@@ -1,0 +1,7 @@
+pip install requests         # For accessing Reddit's API
+pip install pandas           # For data manipulation
+pip install numpy            # For numerical operations
+pip install lets-plot        # For data visualisation
+pip install cairosvg         # To save plots as SVG/PNG
+pip install sqlalchemy       # For interacting with SQLite
+pip install python-dotenv    # For managing environment variables securely
