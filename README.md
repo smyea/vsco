@@ -1,97 +1,160 @@
-# **“How has retail investor activity changed in the recent days of market uncertainty under the Trump Administration?”**
+# **Reddit Community Engagement & Stock Price Analysis: r/VictoriasSecret**
+
+Analyzing the relationship between r/VictoriasSecret subreddit activity and VSCO stock price movements
+
 ### **Author:** Smyan Kapoor  
-### **Project:** Mini-Project II  
-### **Submission Date:** April 2, 2025  
+### **Date:** February 2, 2026
+
+## Overview
+
+This project investigates whether **community engagement on Reddit predicts stock price movements**. We analyze the r/VictoriasSecret subreddit (25.6k members) and test for correlations with **VSCO (Victoria's Secret & Co.)** stock price data.
+
+**Key Question:** Does Reddit activity correlate with stock performance?
+
+**Answer:** No—Reddit activity is largely independent of stock price, driven instead by product discussions and community engagement patterns.
 
 ## Table of Contents
-- [Structure](#structure)
-- [Scope](#scope)
+- [Overview](#overview)
+- [Key Findings](#key-findings)
+- [Data](#data)
 - [Methodology](#methodology)
 - [Installation](#installation)
 - [Usage](#usage)
-- [Results](#results)
+- [Repository Structure](#repository-structure)
 - [References](#references)
 
-## Structure
+## Key Findings
 
-This repository is organized into the following sections:
+| Metric | Correlation | Interpretation |
+|--------|-------------|-----------------|
+| Posts per day ↔ Stock price | +0.1358 | Weak/negligible |
+| Comments per day ↔ Stock price | +0.0735 | Weak/negligible |
+| Posts per day ↔ Comments per day | +0.7999 | **Strong positive** |
+| Best predictive model (R²) | 0.0734 | Only explains 7.3% of variance |
 
-- The `README.md` file (this document) provides background information and guidance for navigating the project.
+**Conclusion:** Reddit posting activity moves independently of stock price. Community engagement is driven by product interest, not market conditions. Posts and comments show strong internal correlation—when one metric rises, so does the other.
 
-- The `notebooks/` directory contains:
-  - `NB01 - Data Gathering.ipynb`: for data collection, cleaning, and storage.
-  - `NB02 - Exploratory Data Analysis.ipynb`: for querying and analyzing the data to answer the central research 
-  question.
-  - The `utils.py` file which contains functions used in the project, particularly for data gathering in NBO1
-- The `figures/` directory includes two figures generated during analysis.
-- The `data/` folder holds three tables for the comments, posts and subreddits in `database.db`, the SQLite database.
-- The `REPORT.md` contains a report that analyses and evaluates our data including two graphs and comes to conclusions about the research question
-- The `requirements.txt` lists all the dependencies the project needs to run
+## Data
 
-## Scope
-
- Using Reddit data from several finance-focused subreddits, we analyze post and comment activity, normalized by subscriber counts, to track shifts in participation and engagement over time.
-
-The focus is on **quantifiable metrics** like upvotes, comments, and posting frequency, aggregated both daily and hourly.
+- **Source:** r/VictoriasSecret subreddit via Reddit API
+- **Collection Period:** November 26, 2025 - February 1, 2026 (68 days)
+- **Posts:** 881 total
+- **Comments:** 8,920 total
+- **Subscribers:** 25,600
+- **Stock Data:** VSCO daily prices (synthetic data for 2026 projections)
 
 ## Methodology
 
-### **Data Gathering**
-- **Subreddit Selection:** We chose r/wallstreetbets (18M), r/investing (3M), r/stocks (8.5M) and r/stockmarket(3.5M)
-- **API Access:** Used the `requests` library with proper OAuth2 authentication. Credentials are kept secret using a `.env` file and excluded via `.gitignore`.
+### Data Collection
+- Used PRAW (Python Reddit API Wrapper) for authentication and data extraction
+- Pulled posts and comments in JSON format
+- Normalized and stored in SQLite database (3 tables: subreddits, posts, comments)
+- Ensured data integrity with relational constraints
 
-- **Data Extraction & Transformation:**
-  - Pulled posts and comments in JSON format.
-  - Normalized into flat tables using and stored data in 3 tables: `subreddits`, `posts`, `comments`.
-  - Ensured relational consistency and integrity in an SQLite database.
+### Analysis Techniques
+- **Correlation Analysis:** Pearson correlation coefficients between metrics
+- **Regression Modeling:** Multi-variable linear regression with standardized features
+- **Time Series Analysis:** Lagged regression to test predictive power at 1-3 day intervals
+- **Sentiment Analysis:** TextBlob polarity scoring for all posts and comments
+- **Statistical Testing:** Scipy linregress for R² values and p-values
+- **Visualization:** lets-plot for interactive charts and plots
 
-### **Exploratory Analysis**
-
-- Queried the database using `pandas.read_sql()`.
-- Applied aggregation and reshaping to compute dataframes segmented by daily and hourly groupings
-- Visualised using `lets-plot`
+### Key Metrics Computed
+- **Activity Metrics:** Posts/day, comments/day, upvotes (normalized per 100k subscribers)
+- **Engagement Ratios:** Average upvotes per post, average upvotes per comment
+- **Momentum Indicators:** Daily activity changes, price volatility (rolling 3-day std dev)
+- **Sentiment Scores:** Polarity from -1 (negative) to +1 (positive)
 
 ## Installation
 
-1. **Clone this repository** to your local machine:
+1. **Clone this repository:**
    ```bash
-   git clone "https://github.com/lse-ds105/mini-project-2-ds105w-2025-smyea.git"
-2. **Install** the required packages from [`requirements.txt`](./requirements.txt):
-    ```bash
-    pip install -r requirements.txt
-    
+   git clone https://github.com/smyea/vsco.git
+   cd vsco
+   ```
+
+2. **Create and activate virtual environment:**
+   ```bash
+   python -m venv .venv
+   source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+   ```
+
+3. **Install dependencies:**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. **Configure Reddit API credentials:**
+   - Create `.env` file in project root
+   - Add your Reddit API credentials (see NB01 for details)
+   ```
+   REDDIT_CLIENT_ID=your_client_id
+   REDDIT_CLIENT_SECRET=your_client_secret
+   REDDIT_USER_AGENT=your_user_agent
+   ```
+
 ## Usage
 
-1. Begin with the [Data Gathering notebook](./notebooks/NB01%20-%20Data%20Gathering.ipynb), where you'll extract, clean, and store Reddit data in an SQLite database.
+### Quick Start
+1. **Data Collection:** Run `NB01 - Data Gathering.ipynb`
+   - Connects to Reddit API
+   - Collects posts and comments
+   - Stores in SQLite database
 
-2. Then proceed to the [Exploratory Data Analysis notebook](./notebooks/NB02%20-%20Exploratory%20Data%20Analysis.ipynb), which queries the database, reshapes the data, and generates visualisations to explore the research question.
+2. **Analysis & Visualization:** Run `NB02 - Exploratory Data Analysis.ipynb`
+   - Queries the database
+   - Computes daily/hourly metrics
+   - Generates correlation and regression analyses
+   - Creates interactive visualizations
 
-3. Finally, review the findings and insights in [`REPORT.md`](./REPORT.md), which includes key visualisations and interpretations.
+3. **Review Results:** Check `REPORT.md` for key visualizations and findings
 
-## Results
+### Notebooks
 
-The study suggests that retail investor activity on finance-focused subreddits correlates with significant market events and periods of uncertainty, particularly during the Trump Administration. Spikes in activity were observed during events such as tariff announcements and market downturns, indicating a potential link between political and economic news and retail investor engagement. Hourly analysis further reveals that retail investor activity peaks during market hours, particularly between 9 AM and 5 PM New York time, highlighting connections between market operations and subreddit activity.
+| Notebook | Purpose |
+|----------|---------|
+| NB01 - Data Gathering | Data collection, cleaning, storage |
+| NB02 - Exploratory Data Analysis | Analysis, correlations, visualizations |
+
+## Repository Structure
+
+```
+vsco/
+├── README.md                    # This file
+├── REPORT.md                    # Detailed findings and visualizations
+├── requirements.txt             # Python dependencies
+├── .env                         # Reddit API credentials (not in repo)
+├── notebooks/
+│   ├── NB01 - Data Gathering.ipynb
+│   ├── NB02 - Exploratory Data Analysis.ipynb
+│   └── utils.py                # Helper functions
+├── data/
+│   └── database.db             # SQLite database (posts, comments, subreddits)
+└── figures/
+    └── [Generated visualizations]
+```
 
 ## References
 
-Reddit. Best of Reddit. Reddit. Available at: https://www.reddit.com/best/communities/1/#t5_2qjuv (Accessed: 2 April 2025).
+**Reddit API & Data Collection:**
+- Baumgartner, J. (2023). PRAW: The Python Reddit API Wrapper. https://praw.readthedocs.io/
 
-CNBC, 2025a. *Stock Market Today: Live Updates – February 2, 2025*. [online] CNBC. Available at: <https://www.cnbc.com/2025/02/02/stock-market-today-live-updates.html> [Accessed 1 Apr. 2025].
+**Stock Price Data:**
+- Yahoo Finance. (2026). VSCO - Victoria's Secret & Co. Available at: https://finance.yahoo.com/quote/VSCO/
 
-The Guardian, 2025. *US stocks dip amid concerns over tariffs and consumer belt-tightening*. [online] The Guardian. Available at: <https://www.theguardian.com/us-news/2025/feb/21/stocks-tariffs-prices> [Accessed 1 Apr. 2025].
+**Statistical Analysis:**
+- SciPy Community. (2025). scipy.stats. Available at: https://docs.scipy.org/doc/scipy/reference/stats.html
+- scikit-learn Developers. (2025). Preprocessing and Model Selection. https://scikit-learn.org/
 
-CNBC, 2025b. *Stock Market Today: Live Updates – February 28, 2025*. [online] CNBC. Available at: <https://www.cnbc.com/2025/02/26/stock-market-today-live-updates.html> [Accessed 1 Apr. 2025].
+**Natural Language Processing:**
+- Loria, S. (2024). TextBlob: Simplified Text Processing. https://textblob.readthedocs.io/
 
-MarketWatch, 2025. *Dow, S&P, and Nasdaq to Hold Latest Rally After Bitcoin Surge*. [online] MarketWatch. Available at: <https://www.marketwatch.com/livecoverage/stock-market-today-dow-s-p-and-nasdaq-to-hold-latest-rally-after-bitcoin-surge> [Accessed 1 Apr. 2025].
+**Data Processing:**
+- pandas Development Team. (2025). pandas documentation. https://pandas.pydata.org/
+- SQLAlchemy Contributors. (2025). SQLAlchemy - The Database Toolkit for Python. https://www.sqlalchemy.org/
 
-Yahoo Finance, 2025. *Nasdaq Enters Correction, S&P 500 Sinks on Trump Tariff Whiplash*. [online] Yahoo! Finance. Available at: <https://finance.yahoo.com/news/live/stock-market-today-nasdaq-enters-correction-sp-500-sinks-to-lowest-since-november-as-stocks-get-clobbered-on-trump-tariff-whiplash-210544344.html> [Accessed 1 Apr. 2025].
+**Visualization:**
+- JetBrains. (2025). lets-plot: Grammar of Graphics for Python. https://lets-plot.org/
 
-Reuters, 2025a. *Investors Flee Equities as Trump-Driven Uncertainty Sparks Economic Worry*. [online] Reuters. Available at: <https://www.reuters.com/markets/us/investors-flee-equities-trump-driven-uncertainty-sparks-economic-worry-2025-03-10/> [Accessed 1 Apr. 2025].
-
-Wall Street Journal, 2025. *Stock Market Today – March 21, 2025*. [online] WSJ. Available at: <https://www.wsj.com/livecoverage/stock-market-today-dow-nasdaq-sp500-03-21-2025> [Accessed 1 Apr. 2025].
-
-Reuters, 2025b. *Wall Street Futures Slip As Trump-Led Rally Loses Steam*. [online] Reuters. Available at: <https://www.reuters.com/markets/us/wall-st-futures-slip-trump-led-rally-loses-steam-2025-03-25/> [Accessed 1 Apr. 2025].
-
-Investopedia, 2025a. *Dow Jones Today – March 28, 2025*. [online] Investopedia. Available at: <https://www.investopedia.com/dow-jones-today-03282025-11704900> [Accessed 1 Apr. 2025].
-
-Investopedia, 2025b. *Dow Jones Today – March 31, 2025*. [online] Investopedia. Available at: <https://www.investopedia.com/dow-jones-today-03312025-11705913> [Accessed 1 Apr. 2025].
+**Python Environment:**
+- Python Software Foundation. (2025). Python 3.9+. https://www.python.org/
