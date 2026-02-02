@@ -266,3 +266,28 @@ def scale_columns_per_100k(df, columns):
     the dictionary comprehension is created from the function argument columns, which is a list
     """
     return df.assign(**{f"{col}_per_100k_subs": df[col] / df["subscribers"] * 100000 for col in columns})
+
+
+###########################
+# Sentiment Aggregation   #
+###########################
+
+def aggregate_sentiment(df, group_by_columns, sentiment_column='sentiment_polarity'):
+    """
+    Aggregates sentiment data by grouping columns.
+    Calculates the mean sentiment polarity and counts observations per group.
+    
+    Args:
+        df: DataFrame with sentiment data
+        group_by_columns: List of columns to group by
+        sentiment_column: Name of the sentiment polarity column
+    
+    Returns:
+        Aggregated DataFrame with mean sentiment and counts
+    """
+    grouped_df = df.groupby(group_by_columns).agg({
+        sentiment_column: "mean",
+        sentiment_column + "_count": ("count" if sentiment_column in df.columns else "size")
+    }).reset_index()
+    
+    return grouped_df
